@@ -3,31 +3,48 @@ const input = await inputFile.text();
 const lines = input.split('\n').filter(line => line.length > 0);
 const showWork = Bun.env.SHOW_WORK === 'true';
 
-const part1Total = countFirstAndLastDigit(lines);
+const part1Digits = lines.map(line => line.replaceAll(/\D/g, '').split(''));
+const part1Total = countFirstAndLastDigit(part1Digits);
 
 const parsedLines = lines.map(line => {
   const numbers = {
-    one: 'one1one',
-    two: 'two2two',
-    three: 'three3three',
-    four: 'four4four',
-    five: 'five5five',
-    six: 'six6six',
-    seven: 'seven7seven',
-    eight: 'eight8eight',
-    nine: 'nine9nine'
+    one: '1',
+    two: '2',
+    three: '3',
+    four: '4',
+    five: '5',
+    six: '6',
+    seven: '7',
+    eight: '8',
+    nine: '9'
   };
 
-  let parsedLine = line;
-  (Object.keys(numbers) as Array<keyof typeof numbers>).forEach(number => {
-    parsedLine = parsedLine.replaceAll(number, numbers[number].toString());
+  const regex = /\d|one|two|three|four|five|six|seven|eight|nine/;
+
+  const firstDigit = line.match(regex)?.pop();
+
+  let lastDigit = ''
+  for (let i=line.length - 1; i > 0; i--) {
+    // search string from end until a match is found
+    const substring = line.substring(i);
+    const foundString = substring.match(regex)?.pop();
+    if (foundString) {
+      lastDigit = foundString;
+      break;
+    }
+  }
+  const results = [firstDigit, lastDigit].filter(digit => !!digit).map(digit => {
+    if (digit?.match(/\d/)) {
+      return digit;
+    }
+    return numbers[digit as keyof typeof numbers];
   });
 
   if (showWork) {
-    console.log(`${line} -> ${parsedLine}`);
+    console.log(`${line} -> ${results}`);
   }
 
-  return parsedLine;
+  return results;
 });
 
 const part2Total = countFirstAndLastDigit(parsedLines);
@@ -35,12 +52,11 @@ const part2Total = countFirstAndLastDigit(parsedLines);
 console.log(`Part 1 answer: ${part1Total}`);
 console.log(`Part 2 answer: ${part2Total}`);
 
-function countFirstAndLastDigit(lines: string[]) {
+function countFirstAndLastDigit(lines: string[][]) {
   let total = 0;
 
   lines.forEach(line => {
-    const digits = line.replaceAll(/\D/g, '');
-    const number = parseInt(`${digits.at(0)}${digits.at(-1)}`);
+    const number = parseInt(`${line.at(0)}${line.at(-1)}`);
     if (showWork) {
       console.log(`${total} + ${number} = ${total + number}`);
     }

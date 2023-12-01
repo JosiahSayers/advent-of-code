@@ -1,3 +1,4 @@
+import { existsSync } from 'fs';
 import { mkdir } from 'fs/promises';
 
 const today = new Date();
@@ -17,7 +18,7 @@ do {
   }
 } while (!day);
 
-if (await Bun.file(`2023/${day}`).exists()) {
+if (existsSync(`2023/${day}`)) {
   const proc = Bun.spawn(['bun', 'run', `2023/${day}/solution.ts`]);
   const output = await new Response(proc.stdout).text();
   await proc.exited;
